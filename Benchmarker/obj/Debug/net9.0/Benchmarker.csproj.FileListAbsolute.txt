@@ -1,0 +1,14 @@
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\bin\Debug\net9.0\Benchmarker.exe
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\bin\Debug\net9.0\Benchmarker.deps.json
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\bin\Debug\net9.0\Benchmarker.runtimeconfig.json
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\bin\Debug\net9.0\Benchmarker.dll
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\bin\Debug\net9.0\Benchmarker.pdb
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\Benchmarker.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\Benchmarker.AssemblyInfoInputs.cache
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\Benchmarker.AssemblyInfo.cs
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\Benchmarker.csproj.CoreCompileInputs.cache
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\Benchmarker.dll
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\refint\Benchmarker.dll
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\Benchmarker.pdb
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\Benchmarker.genruntimeconfig.cache
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\ref\Benchmarker.dll
