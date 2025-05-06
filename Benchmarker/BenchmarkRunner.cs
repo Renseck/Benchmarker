@@ -10,7 +10,8 @@ namespace Benchmarker
         /* ========================================================================================== */
         // Usage: BenchmarkRunner.Benchmark(SomeMethod, label : "SomeMethod Benchmark");
         // Usage: BenchmarkRunner.Benchmark(SomeMethod, iterations : 10, label : "SomeMethod Benchmark with set iterations");
-        public static BenchmarkResult Benchmark(Action action, int? iterations = null, string label = "Benchmark", bool verbose = false, bool removeOutliers = false)
+        public static BenchmarkResult Benchmark(Action action, int? iterations = null, string label = "Benchmark",
+            bool verbose = false, bool removeOutliers = false, string? logFile = null)
         {
             if (iterations.HasValue && iterations <= 0) throw new ArgumentException("Iteration count must be positive.");
 
@@ -19,7 +20,8 @@ namespace Benchmarker
                 Iterations = iterations,
                 Label = label,
                 Verbose = verbose,
-                RemoveOutliers = removeOutliers
+                RemoveOutliers = removeOutliers,
+                LogFile = logFile
             };
 
             int iterationsToRun = options.Iterations ?? DetermineOptimalIterations(action);
@@ -29,7 +31,8 @@ namespace Benchmarker
         /* ========================================================================================== */
         // Usage: BenchmarkRunner.Benchmark(arg1 => SomeMethod(arg1), arg1value, label : "SomeMethod Benchmark")
         // Usage: BenchmarkRunner.Benchmark(arg1 => SomeMethod(arg1), arg1value, iterations : 20, label : "SomeMethod Benchmark")
-        public static BenchmarkResult Benchmark<T>(Action<T> action, T arg, int? iterations = null, string label = "Benchmark", bool verbose = false, bool removeOutliers = false)
+        public static BenchmarkResult Benchmark<T>(Action<T> action, T arg, int? iterations = null, string label = "Benchmark",
+            bool verbose = false, bool removeOutliers = false, string? logFile = null)
         {
             if (iterations.HasValue && iterations <= 0) throw new ArgumentException("Iteration count must be positive.");
 
@@ -38,7 +41,8 @@ namespace Benchmarker
                 Iterations = iterations,
                 Label = label,
                 Verbose = verbose,
-                RemoveOutliers = removeOutliers
+                RemoveOutliers = removeOutliers,
+                LogFile = logFile
             };
 
             int iterationsToRun = options.Iterations ?? DetermineOptimalIterations(() => action(arg));
@@ -48,7 +52,8 @@ namespace Benchmarker
         /* ========================================================================================== */
         // Usage: BenchmarkRunner.Benchmark((arg1, arg2) => SomeMethod(arg1, arg2), arg1value, arg2value, label : "SomeMethod Benchmark")
         // Usage: BenchmarkRunner.Benchmark((arg1, arg2) => SomeMethod(arg1, arg2), arg1value, arg2value, iterations : 20, label : "SomeMethod Benchmark")
-        public static BenchmarkResult Benchmark<T1, T2>(Action<T1, T2> action, T1 arg1, T2 arg2, int? iterations = null, string label = "Benchmark", bool verbose = false, bool removeOutliers = false)
+        public static BenchmarkResult Benchmark<T1, T2>(Action<T1, T2> action, T1 arg1, T2 arg2, int? iterations = null, string label = "Benchmark",
+            bool verbose = false, bool removeOutliers = false, string? logFile = null)
         {
             if (iterations.HasValue && iterations.Value <= 0) throw new ArgumentException("Iteration count must be positive.");
 
@@ -57,7 +62,8 @@ namespace Benchmarker
                 Iterations = iterations,
                 Label = label,
                 Verbose = verbose,
-                RemoveOutliers = removeOutliers
+                RemoveOutliers = removeOutliers,
+                LogFile = logFile
             };
 
             int iterationsToRun = options.Iterations ?? DetermineOptimalIterations(() => action(arg1, arg2));
@@ -69,6 +75,11 @@ namespace Benchmarker
         {
             var timings = new List<double>();
             Console.WriteLine($"{options.Label} - Running {iterationsToRun} iterations...\n");
+
+            // Create log file writer if specified
+            using StreamWriter? logWriter = options.LogFile != null ? new StreamWriter(options.LogFile, true) : null;
+
+            logWriter?.WriteLine($"[{DateTime.Now}] {options.Label} - Running {iterationsToRun} iterations");
 
             for (int i = 0; i < iterationsToRun; i++)
             {
@@ -82,7 +93,12 @@ namespace Benchmarker
 
                 double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
                 timings.Add(elapsedMs);
-                if (options.Verbose) Console.WriteLine($"Iteration {i + 1}: {elapsedMs:F2} ms");
+                if (options.Verbose)
+                {
+                    string message = "Iteration {i + 1}: {elapsedMs:F2} ms";
+                    Console.WriteLine(message);
+                    logWriter?.WriteLine(message);
+                } 
             }
 
             // Remove outliers if requested
@@ -91,10 +107,18 @@ namespace Benchmarker
                 var sortedTimings = timings.OrderBy(t => t).ToList();
                 int toRemove = Math.Max(1, sortedTimings.Count / 10);
                 timings = sortedTimings.Skip(toRemove).Take(sortedTimings.Count - 2 * toRemove).ToList();
+
+                logWriter?.WriteLine($"Removed {2 * toRemove} outliers, keepings {timings.Count} measurements");
             }
 
             var result = new BenchmarkResult(timings, options.Label);
-            result.PrintSummary();
+            result.WriteToConsole();
+
+            if (logWriter != null)
+            {
+                result.WriteToLog(logWriter);
+            }
+            
             return result;
         }
 
@@ -152,6 +176,19 @@ namespace Benchmarker
             Label = label;
         }
 
+        /* ====================================================================================== */
+        public void WriteToConsole()
+        {
+            Console.Write(GenerateSummary());
+        }
+
+        /* ====================================================================================== */
+        public void WriteToLog(StreamWriter writer)
+        {
+            writer?.Write(GenerateSummary());
+            writer?.WriteLine(); // Add a blank line for spacing
+        }
+
         /* ========================================================================================== */
         private double CalculatePercentile(List<double> values, int percentile)
         {
@@ -162,40 +199,45 @@ namespace Benchmarker
         }
 
         /* ========================================================================================== */
-        public void PrintSummary()
+        private string GenerateSummary()
         {
             string opener = $"\n------ {Label} Summary ------";
             string separator = string.Concat(Enumerable.Repeat("-", opener.Length - 1));
-            
-            Console.WriteLine(opener);
-            Console.WriteLine($"> Based on {Timings.Count} runs:");
-            Console.WriteLine(separator);
-            
+
+            var sb = new System.Text.StringBuilder();
+
+            sb.AppendLine(opener);
+            sb.AppendLine($"> Based on {Timings.Count} runs:");
+            sb.AppendLine(separator);
+
             // Define column widths to ensure alignment
             const int metricColWidth = 14;  // Width of "Metric" column
             const int valueColWidth = 25;   // Width of "Value" column
             
             // Table headers
             string headerFormat = $"  {{0,-{metricColWidth}}}|  {{1,-{valueColWidth}}}";
-            Console.WriteLine(headerFormat, "Metric", "Value");
+            sb.AppendLine(string.Format(headerFormat, "Metric", "Value"));
             
-            // Table separator line - exactly the same width as the main separator
+            // Table separator line
             string tableSeparator = new string('-', metricColWidth + 2) + "+" + new string('-', valueColWidth + 2);
-            Console.WriteLine(tableSeparator);
+            sb.AppendLine(tableSeparator);
             
             // Row format
             string rowFormat = $"  {{0,-{metricColWidth}}}| {{1,-{valueColWidth}}}";
             
             // Table rows
-            Console.WriteLine(string.Format(rowFormat, "Average", $"{Average:F3} ms (± {StandardDeviation:F3} ms)"));
-            Console.WriteLine(string.Format(rowFormat, "Min", $"{Min:F3} ms"));
-            Console.WriteLine(string.Format(rowFormat, "Max", $"{Max:F3} ms"));
-            Console.WriteLine(string.Format(rowFormat, "Median (P50)", $"{Median:F3} ms"));
-            Console.WriteLine(string.Format(rowFormat, "P95", $"{P95:F3} ms"));
-            Console.WriteLine(string.Format(rowFormat, "P99", $"{P99:F3} ms"));
+            sb.AppendLine(string.Format(rowFormat, "Average", $"{Average:F3} ms (± {StandardDeviation:F3} ms)"));
+            sb.AppendLine(string.Format(rowFormat, "Min", $"{Min:F3} ms"));
+            sb.AppendLine(string.Format(rowFormat, "Max", $"{Max:F3} ms"));
+            sb.AppendLine(string.Format(rowFormat, "Median (P50)", $"{Median:F3} ms"));
+            sb.AppendLine(string.Format(rowFormat, "P95", $"{P95:F3} ms"));
+            sb.AppendLine(string.Format(rowFormat, "P99", $"{P99:F3} ms"));
             
-            Console.WriteLine(separator);
+            sb.AppendLine(separator);
+            
+            return sb.ToString();
         }
+
     }
 
     /* ============================================================================================== */
@@ -207,5 +249,6 @@ namespace Benchmarker
         public bool Verbose { get; set; } = false;
         public int WarmupIterations { get; set; } = 3;
         public bool RemoveOutliers { get; set; } = true;
+        public string? LogFile { get; set; } = null;
     }
 }

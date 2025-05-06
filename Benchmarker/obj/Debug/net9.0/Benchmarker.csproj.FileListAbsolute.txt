@@ -12,3 +12,4 @@ C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\refint\
 C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\Benchmarker.pdb
 C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\Benchmarker.genruntimeconfig.cache
 C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\ref\Benchmarker.dll
+C:\Users\rens_\Documents\GitHub\Benchmarker\Benchmarker\obj\Debug\net9.0\Benchmarker.sourcelink.json

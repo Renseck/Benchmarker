@@ -8,12 +8,12 @@ namespace Benchmarker
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Benchmark(TestFunction, label: "TestFunction Benchmark", verbose: false, removeOutliers: false);
+            BenchmarkRunner.Benchmark(TestFunction, label: "TestFunction Benchmark", verbose: false, removeOutliers: true, logFile: "Logging_test.log");
 
-            using (var tracker = new PerformanceTracker("TestFunction Performance"))
-            {
-                TestFunction();
-            }
+            // using (var tracker = new PerformanceTracker("TestFunction Performance"))
+            // {
+            //     TestFunction();
+            // }
         }
 
         static void TestFunction()

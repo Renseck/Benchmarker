@@ -1,0 +1,16 @@
+[06/05/2025 11:02:03] TestFunction Benchmark - Running 10000 iterations
+Removed 2000 outliers, keepings 8000 measurements
+
+------ TestFunction Benchmark Summary ------
+> Based on 8000 runs:
+--------------------------------------------
+  Metric        |  Value                    
+----------------+---------------------------
+  Average       | 0,010 ms (± 0,002 ms)    
+  Min           | 0,009 ms                 
+  Max           | 0,021 ms                 
+  Median (P50)  | 0,009 ms                 
+  P95           | 0,015 ms                 
+  P99           | 0,021 ms                 
+--------------------------------------------
+
